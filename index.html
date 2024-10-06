@@ -19,7 +19,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 100vh;
+            height: var(--tg-viewport-stable-height, 100vh);
+            transition: height 0.3s ease;
         }
 
         .calculator {
@@ -100,6 +101,7 @@
             <button onclick="appendToScreen('.')">.</button>
             <button onclick="calculateResult()" class="equal">=</button>
         </div>
+        <button style="margin-top: 20px; width: 100%;" onclick="expandView()">Agrandir Vue</button>
     </div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -107,39 +109,59 @@
         let screen = document.getElementById('screen');
         let currentInput = '';
 
+        // Fonction pour effacer l'écran
         function clearScreen() {
             currentInput = '';
             screen.innerText = '0';
         }
 
+        // Ajouter à l'écran
         function appendToScreen(value) {
             if (currentInput.length === 0 && value === '0') {
-                return; // Avoid adding leading zeros
+                return; // Eviter les zéros en tête
             }
             currentInput += value;
             screen.innerText = currentInput;
         }
 
+        // Calculer le résultat
         function calculateResult() {
             try {
                 let result = eval(currentInput);
                 screen.innerText = result;
                 currentInput = result.toString();
             } catch (error) {
-                screen.innerText = 'Error';
+                screen.innerText = 'Erreur';
                 currentInput = '';
             }
         }
 
-        // Initialize Telegram WebApp
+        // Fonction pour agrandir la vue WebApp
+        function expandView() {
+            Telegram.WebApp.expand(); // Agrandir la vue
+            setViewportData(); // Mettre à jour les dimensions
+        }
+
+        // Fonction pour mettre à jour les dimensions du viewport
+        function setViewportData() {
+            document.body.style.height = Telegram.WebApp.viewportStableHeight + 'px';
+        }
+
+        // Initialiser la WebApp
         Telegram.WebApp.ready();
 
-        // Event for theme change
+        // Écouter le changement de dimensions
+        Telegram.WebApp.onEvent('viewportChanged', setViewportData);
+
+        // Écouter le changement de thème
         Telegram.WebApp.onEvent('themeChanged', function() {
             document.body.style.setProperty('--bg-color', Telegram.WebApp.themeParams.bg_color);
             document.body.style.setProperty('--text-color', Telegram.WebApp.themeParams.text_color);
         });
 
+        // Définir la hauteur initiale
+        setViewportData();
+
     </script>
 </body>
-  </html>
+</html>
