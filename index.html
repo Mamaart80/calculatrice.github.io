@@ -1,31 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Calculatrice Mini App</title>
     <style>
         body {
-            --bg-color: var(--tg-theme-bg-color);
-            font: 12px/18px "Lucida Grande", "Lucida Sans Unicode", Arial, Helvetica, Verdana, sans-serif;
+            --bg-color: var(--tg-theme-bg-color, #f5f5f5);
+            --text-color: var(--tg-theme-text-color, #333);
+            --button-color: #0088cc;
+            --button-hover-color: #0077aa;
+            font-family: Arial, sans-serif;
             background-color: var(--bg-color);
-            color: var(--tg-theme-text-color);
-            margin: 48px 24px;
+            color: var(--text-color);
+            margin: 0;
             padding: 0;
-            color-scheme: var(--tg-color-scheme);
-            max-height: 80vh;
-            overflow: hidden;
-        }
-
-        #viewport {
-            position: fixed;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: var(--tg-viewport-stable-height, 300px); /* Hauteur initiale fixée à 300px */
-            pointer-events: none;
-            transition: all .2s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
         }
 
         .calculator {
@@ -34,7 +28,6 @@
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             padding: 20px;
             width: 300px;
-            margin: 0 auto;
         }
 
         .screen {
@@ -58,7 +51,7 @@
         button {
             padding: 20px;
             font-size: 1.5em;
-            background-color: #0088cc;
+            background-color: var(--button-color);
             color: white;
             border: none;
             border-radius: 5px;
@@ -67,7 +60,7 @@
         }
 
         button:hover {
-            background-color: #0077aa;
+            background-color: var(--button-hover-color);
         }
 
         button.clear {
@@ -79,7 +72,6 @@
         }
     </style>
 </head>
-
 <body>
     <div class="calculator">
         <div class="screen" id="screen">0</div>
@@ -108,69 +100,44 @@
             <button onclick="appendToScreen('.')">.</button>
             <button onclick="calculateResult()" class="equal">=</button>
         </div>
-        <button style="margin-top: 20px; width: 100%;" onclick="expandView()">Expand View</button>
     </div>
-
-    <div id="viewport"></div>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <script>
         let screen = document.getElementById('screen');
         let currentInput = '';
 
-        // Fonction pour effacer l'écran
         function clearScreen() {
             currentInput = '';
             screen.innerText = '0';
         }
 
-        // Ajouter à l'écran
         function appendToScreen(value) {
             if (currentInput.length === 0 && value === '0') {
-                return; // Eviter les zéros en tête
+                return; // Avoid adding leading zeros
             }
             currentInput += value;
             screen.innerText = currentInput;
         }
 
-        // Calculer le résultat
         function calculateResult() {
             try {
                 let result = eval(currentInput);
                 screen.innerText = result;
                 currentInput = result.toString();
             } catch (error) {
-                screen.innerText = 'Erreur';
+                screen.innerText = 'Error';
                 currentInput = '';
             }
         }
 
-        // Fonction pour agrandir la vue WebApp
-        function expandView() {
-            Telegram.WebApp.expand();
-            setViewportData();
-        }
-
-        // Fonction pour mettre à jour les dimensions du viewport
-        function setViewportData() {
-            var sizeEl = document.getElementById('viewport-params-size');
-            sizeEl.innerText = 'width: ' + window.innerWidth + ' x ' + 
-                'height: ' + Telegram.WebApp.viewportStableHeight;
-
-            var expandEl = document.querySelector('#viewport-params-expand');
-            expandEl.innerText = 'Is Expanded: ' + (Telegram.WebApp.isExpanded ? 'true' : 'false');
-        }
-
-        // Initialisation de la WebApp sans agrandir automatiquement
+        // Initialize Telegram WebApp
         Telegram.WebApp.ready();
-        setViewportData();
 
-        // Gestion du changement de dimensions
-        Telegram.WebApp.onEvent('viewportChanged', setViewportData);
-
-        // Gestion du changement de thème
+        // Event for theme change
         Telegram.WebApp.onEvent('themeChanged', function() {
             document.body.style.setProperty('--bg-color', Telegram.WebApp.themeParams.bg_color);
+            document.body.style.setProperty('--text-color', Telegram.WebApp.themeParams.text_color);
         });
 
     </script>
